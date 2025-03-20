@@ -1,101 +1,110 @@
+// Import dependencies
+import { gameState, saveGame } from './main.js';
+import { races, classes, createCharacter, updateCharacterStats } from './character.js';
+import { updateInventory } from './inventory.js';
+
 // UI management
-const screens = {
-    hub: document.getElementById('hub-menu'),
+export const screens = {
+    main: document.getElementById('main-menu'),
     creation: document.getElementById('character-creation'),
-    stats: document.getElementById('character-stats')
+    stats: document.getElementById('character-stats'),
+    combat: document.getElementById('combat-screen'),
+    encounter: document.getElementById('encounter-screen'),
+    exploration: document.getElementById('exploration-screen'),
+    inventory: document.getElementById('inventory-screen')
 };
 
 // Screen management
-function showScreen(screenId) {
-    Object.values(screens).forEach(screen => {
-        screen.classList.remove('active');
-        screen.classList.add('hidden');
-    });
+export function showScreen(screenId) {
+    console.log('Showing screen:', screenId);
+    console.log('Available screens:', screens);
+    document.querySelectorAll('.screen').forEach(screen => screen.classList.add('hidden'));
     screens[screenId].classList.remove('hidden');
-    screens[screenId].classList.add('active');
 }
 
-// Character creation UI
-function initializeCharacterCreation() {
+// Initialize character creation UI
+export function initializeCharacterCreation() {
+    console.log('Initializing character creation');
     const raceSelection = document.getElementById('race-selection');
     const classSelection = document.getElementById('class-selection');
     const preview = document.getElementById('character-preview');
     const createBtn = document.getElementById('create-btn');
-    
-    let selectedRace = null;
-    let selectedClass = null;
 
-    // Populate race selection
+    // Add race options
     Object.entries(races).forEach(([id, race]) => {
-        const element = document.createElement('div');
-        element.className = 'selection-option';
-        element.innerHTML = `
-            <h4>${race.name}</h4>
-            <p>${race.bonus}</p>
-            <div class="stats-preview">
-                STR: ${race.stats.strength} | AGI: ${race.stats.agility}<br>
-                INT: ${race.stats.intelligence} | CHA: ${race.stats.charisma}
-            </div>
+        const option = document.createElement('div');
+        option.className = 'selection-option';
+        option.innerHTML = `
+            <input type="radio" name="race" value="${id}" id="race-${id}">
+            <label for="race-${id}">
+                <h4>${race.name}</h4>
+                <p>${race.bonus || ''}</p>
+            </label>
         `;
-        element.addEventListener('click', () => {
-            document.querySelectorAll('#race-selection .selection-option').forEach(opt => opt.classList.remove('selected'));
-            element.classList.add('selected');
-            selectedRace = id;
-            updatePreview();
-        });
-        raceSelection.appendChild(element);
+        raceSelection.appendChild(option);
     });
 
-    // Populate class selection
-    Object.entries(classes).forEach(([id, characterClass]) => {
-        const element = document.createElement('div');
-        element.className = 'selection-option';
-        element.innerHTML = `
-            <h4>${characterClass.name}</h4>
-            <p>${characterClass.description}</p>
-            <div class="ability-preview">
-                Ability: ${characterClass.ability} (${characterClass.cooldown} turn cooldown)
-            </div>
+    // Add class options
+    Object.entries(classes).forEach(([id, classData]) => {
+        const option = document.createElement('div');
+        option.className = 'selection-option';
+        option.innerHTML = `
+            <input type="radio" name="class" value="${id}" id="class-${id}">
+            <label for="class-${id}">
+                <h4>${classData.name}</h4>
+                <p>${classData.ability || ''}</p>
+            </label>
         `;
-        element.addEventListener('click', () => {
-            document.querySelectorAll('#class-selection .selection-option').forEach(opt => opt.classList.remove('selected'));
-            element.classList.add('selected');
-            selectedClass = id;
-            updatePreview();
-        });
-        classSelection.appendChild(element);
+        classSelection.appendChild(option);
+    });
+
+    // Update preview when selections change
+    document.querySelectorAll('input[name="race"], input[name="class"]').forEach(input => {
+        input.addEventListener('change', updatePreview);
     });
 
     function updatePreview() {
+        console.log('Updating preview');
+        const selectedRace = document.querySelector('input[name="race"]:checked')?.value;
+        const selectedClass = document.querySelector('input[name="class"]:checked')?.value;
+
         if (selectedRace && selectedClass) {
-            const previewChar = createCharacter(selectedRace, selectedClass);
+            const race = races[selectedRace];
+            const classData = classes[selectedClass];
             preview.innerHTML = `
-                <h4>Character Preview</h4>
+                <h3>${race.name} ${classData.name}</h3>
                 <div class="preview-stats">
-                    <p>Health: ${previewChar.stats.health}</p>
-                    <p>Mana: ${previewChar.stats.mana}</p>
-                    <p>Strength: ${previewChar.stats.strength}</p>
-                    <p>Agility: ${previewChar.stats.agility}</p>
-                    <p>Intelligence: ${previewChar.stats.intelligence}</p>
-                    <p>Charisma: ${previewChar.stats.charisma}</p>
+                    <div>Strength: ${race.stats.strength + (classData.stats.strength || 0)}</div>
+                    <div>Agility: ${race.stats.agility + (classData.stats.agility || 0)}</div>
+                    <div>Intelligence: ${race.stats.intelligence + (classData.stats.intelligence || 0)}</div>
+                    <div>Charisma: ${race.stats.charisma + (classData.stats.charisma || 0)}</div>
                 </div>
             `;
             createBtn.disabled = false;
+        } else {
+            preview.innerHTML = '<p>Select a race and class to see preview</p>';
+            createBtn.disabled = true;
         }
     }
 
     // Create character button
     createBtn.addEventListener('click', () => {
+        console.log('Create button clicked');
+        const selectedRace = document.querySelector('input[name="race"]:checked')?.value;
+        const selectedClass = document.querySelector('input[name="class"]:checked')?.value;
+
         if (selectedRace && selectedClass) {
+            console.log('Creating character:', selectedRace, selectedClass);
             gameState.player = createCharacter(selectedRace, selectedClass);
+            console.log('Character created:', gameState.player);
             saveGame();
-            showScreen('hub');
+            showScreen('main');
         }
     });
 }
 
 // Character stats display
-function updateCharacterStats() {
+export function updateCharacterStats() {
     if (!gameState.player) return;
 
     const info = document.getElementById('character-info');
@@ -152,32 +161,117 @@ function updateCharacterStats() {
 
 // Event Listeners
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM Content Loaded in ui.js');
+    
     // Initialize character creation screen
     initializeCharacterCreation();
 
     // Hub menu buttons
-    document.getElementById('character-btn').addEventListener('click', () => {
-        if (gameState.player) {
-            updateCharacterStats();
-            showScreen('stats');
-        } else {
-            alert('Create a character first!');
-        }
-    });
+    const createCharacterBtn = document.getElementById('create-character-btn');
+    console.log('Create character button:', createCharacterBtn);
+    
+    if (createCharacterBtn) {
+        createCharacterBtn.addEventListener('click', () => {
+            console.log('Create character button clicked');
+            showScreen('creation');
+        });
+    }
 
-    document.getElementById('create-character-btn').addEventListener('click', () => {
-        showScreen('creation');
-    });
+    const characterBtn = document.getElementById('character-btn');
+    console.log('Character button:', characterBtn);
+    
+    if (characterBtn) {
+        characterBtn.addEventListener('click', () => {
+            console.log('Character button clicked');
+            if (gameState.player) {
+                showScreen('stats');
+                updateCharacterStats();
+            } else {
+                alert('Create a character first!');
+            }
+        });
+    }
+
+    const inventoryBtn = document.getElementById('inventory-btn');
+    console.log('Inventory button:', inventoryBtn);
+    
+    if (inventoryBtn) {
+        inventoryBtn.addEventListener('click', () => {
+            console.log('Inventory button clicked');
+            if (gameState.player) {
+                showScreen('inventory');
+                updateInventory();
+            } else {
+                alert('Create a character first!');
+            }
+        });
+    }
 
     // Back buttons
-    document.getElementById('back-to-menu-btn').addEventListener('click', () => {
-        showScreen('hub');
-    });
+    const backToMenuBtn = document.getElementById('back-to-menu-btn');
+    console.log('Back to menu button:', backToMenuBtn);
+    
+    if (backToMenuBtn) {
+        backToMenuBtn.addEventListener('click', () => {
+            console.log('Back to menu button clicked');
+            showScreen('main');
+        });
+    }
 
-    document.getElementById('back-from-stats-btn').addEventListener('click', () => {
-        showScreen('hub');
-    });
+    const backFromStatsBtn = document.getElementById('back-from-stats-btn');
+    console.log('Back from stats button:', backFromStatsBtn);
+    
+    if (backFromStatsBtn) {
+        backFromStatsBtn.addEventListener('click', () => {
+            console.log('Back from stats button clicked');
+            showScreen('main');
+        });
+    }
 
     // Show initial screen
-    showScreen('hub');
+    showScreen('main');
 });
+
+// Handle combat end
+export function handleCombatEnd(state) {
+    if (state.victory) {
+        // Collect loot
+        const loot = state.turnOrder.slice(1).reduce((items, enemy) => {
+            if (enemy.drops) items.push(...enemy.drops);
+            return items;
+        }, []);
+
+        // Add gold
+        const gold = state.turnOrder.slice(1).reduce((total, enemy) => total + enemy.gold, 0);
+        gameState.player.gold += gold;
+
+        if (loot.length > 0) {
+            if (!gameState.player.inventory) gameState.player.inventory = [];
+            gameState.player.inventory.push(...loot);
+            state.log.push(`Found: ${loot.join(', ')}`);
+        }
+        state.log.push(`Found ${gold} gold!`);
+
+        // Show victory screen after delay
+        setTimeout(() => {
+            alert('Victory! You can now return to exploring.');
+            document.querySelectorAll('.screen').forEach(screen => screen.classList.add('hidden'));
+            document.getElementById('main-menu').classList.remove('hidden');
+        }, 2000);
+    } else {
+        // Show defeat screen after delay
+        setTimeout(() => {
+            alert('You have been defeated! Returning to town...');
+            document.querySelectorAll('.screen').forEach(screen => screen.classList.add('hidden'));
+            document.getElementById('main-menu').classList.remove('hidden');
+        }, 2000);
+    }
+}
+
+// Add combat end observer
+setInterval(() => {
+    if (currentCombatState?.ended && !currentCombatState.processed) {
+        currentCombatState.processed = true;
+        handleCombatEnd(currentCombatState);
+    }
+}, 100);

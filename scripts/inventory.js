@@ -114,3 +114,6 @@ function testCrafting() {
     craftItem('Iron Sword', inventory);
     console.log('After crafting:', inventory);
 }
+
+// Export inventory data and functions
+export { Inventory, recipes, craftItem, testCrafting };

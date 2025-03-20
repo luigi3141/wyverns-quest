@@ -9,14 +9,24 @@
 </head>
 <body>
     <div id="game-container">
-        <!-- Hub Menu -->
-        <div id="hub-menu" class="screen">
+        <!-- Main Menu -->
+        <div id="main-menu" class="screen">
             <h1>Wyvern's Quest</h1>
-            <button id="character-btn">Character</button>
-            <button id="inventory-btn">Inventory</button>
-            <button id="dungeon-btn">Dungeons</button>
-            <button id="settings-btn">Settings</button>
-            <button id="create-character-btn">New Game</button>
+            <div class="menu-buttons">
+                <button id="create-character-btn">Create Character</button>
+                <button id="character-btn">Character Sheet</button>
+                <button id="inventory-btn">Inventory</button>
+            </div>
+            <div class="explore-section">
+                <h2>Explore Areas</h2>
+                <div class="area-buttons">
+                    <button id="explore-forest-btn" class="area-btn forest">Forest</button>
+                    <button id="explore-cave-btn" class="area-btn cave">Dark Cave</button>
+                    <button id="explore-desert-btn" class="area-btn desert">Desert</button>
+                    <button id="explore-swamp-btn" class="area-btn swamp">Swamp</button>
+                    <button id="explore-mountain-btn" class="area-btn mountain">Mountains</button>
+                </div>
+            </div>
         </div>
 
         <!-- Character Creation Screen -->
@@ -60,14 +70,95 @@
             </div>
             <button id="back-from-stats-btn">Back to Menu</button>
         </div>
+
+        <!-- Combat Screen -->
+        <div id="combat-screen" class="screen hidden">
+            <div class="combat-header">
+                <h2>Combat</h2>
+                <div class="turn-indicator">Round: <span id="round-counter">1</span></div>
+            </div>
+            
+            <div class="combat-arena">
+                <div class="combatant player">
+                    <div class="combatant-info">
+                        <h3 id="player-name">Player</h3>
+                        <div class="health-bar">
+                            <div class="health-fill" id="player-health"></div>
+                            <span class="health-text" id="player-health-text">100/100</span>
+                        </div>
+                        <div class="mana-bar">
+                            <div class="mana-fill" id="player-mana"></div>
+                            <span class="mana-text" id="player-mana-text">50/50</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="combat-log" id="combat-log">
+                    <!-- Combat messages will be added here -->
+                </div>
+
+                <div class="combatant enemy">
+                    <div class="combatant-info">
+                        <h3 id="enemy-name">Enemy</h3>
+                        <div class="health-bar">
+                            <div class="health-fill" id="enemy-health"></div>
+                            <span class="health-text" id="enemy-health-text">100/100</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="combat-controls">
+                <div class="action-buttons">
+                    <button id="attack-btn" class="combat-btn">Attack</button>
+                    <button id="ability-btn" class="combat-btn">Ability</button>
+                    <button id="defend-btn" class="combat-btn">Defend</button>
+                    <button id="item-btn" class="combat-btn">Use Item</button>
+                </div>
+                <div class="combat-inventory" id="combat-inventory">
+                    <!-- Items will be shown here when item button is clicked -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Encounter Screen -->
+        <div id="encounter-screen" class="screen hidden">
+            <div class="encounter-header">
+                <h2>Encounter!</h2>
+            </div>
+            <div class="encounter-description" id="encounter-description">
+                <!-- Encounter description will be added here -->
+            </div>
+            <div class="encounter-enemies" id="encounter-enemies">
+                <!-- Enemy list will be added here -->
+            </div>
+            <div class="encounter-actions">
+                <button id="engage-btn" class="encounter-btn">Attack!</button>
+                <button id="flee-btn" class="encounter-btn">Attempt to Flee</button>
+            </div>
+        </div>
+
+        <!-- Exploration Screen -->
+        <div id="exploration-screen" class="screen hidden">
+            <div class="exploration-header">
+                <h2>Exploring <span id="current-location">Forest</span></h2>
+            </div>
+            <div class="exploration-description" id="exploration-description">
+                You are exploring the area...
+            </div>
+            <div class="exploration-actions">
+                <button id="continue-exploring-btn">Continue Exploring</button>
+                <button id="return-to-town-btn">Return to Town</button>
+            </div>
+        </div>
     </div>
-    <script src="scripts/main.js"></script>
-    <script src="scripts/ui.js"></script>
-    <script src="scripts/character.js"></script>
-    <script src="scripts/dungeon.js"></script>
-    <script src="scripts/combat.js"></script>
-    <script src="scripts/inventory.js"></script>
-    <script src="scripts/quests.js"></script>
-    <script src="scripts/audio.js"></script>
+    <script type="module" src="scripts/main.js"></script>
+    <script type="module" src="scripts/ui.js"></script>
+    <script type="module" src="scripts/character.js"></script>
+    <script type="module" src="scripts/dungeon.js"></script>
+    <script type="module" src="scripts/combat.js"></script>
+    <script type="module" src="scripts/inventory.js"></script>
+    <script type="module" src="scripts/quests.js"></script>
+    <script type="module" src="scripts/audio.js"></script>
 </body>
 </html>

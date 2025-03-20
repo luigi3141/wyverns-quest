@@ -193,6 +193,431 @@ button:disabled {
     background: #555;
 }
 
+/* Combat Screen */
+#combat-screen {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.combat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background-color: #232323;
+    border-radius: 8px;
+}
+
+.turn-indicator {
+    font-size: 1.2em;
+    color: #ffd700;
+}
+
+.combat-arena {
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr;
+    gap: 20px;
+    align-items: start;
+    min-height: 300px;
+}
+
+.combatant {
+    background-color: #232323;
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.combatant-info h3 {
+    margin-bottom: 15px;
+}
+
+.health-bar, .mana-bar {
+    width: 100%;
+    height: 20px;
+    background-color: #333;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    position: relative;
+    overflow: hidden;
+}
+
+.health-fill {
+    height: 100%;
+    background-color: #e74c3c;
+    width: 100%;
+    transition: width 0.3s ease;
+}
+
+.mana-fill {
+    height: 100%;
+    background-color: #3498db;
+    width: 100%;
+    transition: width 0.3s ease;
+}
+
+.health-text, .mana-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #fff;
+    font-size: 0.8em;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.combat-log {
+    height: 300px;
+    background-color: #232323;
+    border-radius: 8px;
+    padding: 15px;
+    overflow-y: auto;
+    font-family: 'Inter', monospace;
+    font-size: 0.9em;
+    line-height: 1.4;
+}
+
+.combat-log .message {
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #333;
+}
+
+.combat-log .damage {
+    color: #e74c3c;
+}
+
+.combat-log .heal {
+    color: #2ecc71;
+}
+
+.combat-log .effect {
+    color: #f1c40f;
+}
+
+.combat-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.action-buttons {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+.combat-btn {
+    padding: 15px;
+    font-size: 1.1em;
+    background-color: #3a3a3a;
+    border: 2px solid #4a4a4a;
+    color: #fff;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.combat-btn:hover:not(:disabled) {
+    background-color: #4a4a4a;
+    border-color: #5a5a5a;
+}
+
+.combat-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.combat-btn.active {
+    background-color: #2c3e50;
+    border-color: #3498db;
+}
+
+.combat-inventory {
+    display: none;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    padding: 15px;
+    background-color: #232323;
+    border-radius: 8px;
+}
+
+.combat-inventory.active {
+    display: grid;
+}
+
+.item-slot {
+    aspect-ratio: 1;
+    background-color: #333;
+    border: 2px solid #444;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.item-slot:hover {
+    border-color: #666;
+}
+
+.item-slot.selected {
+    border-color: #ffd700;
+}
+
+/* Encounter Screen */
+#encounter-screen {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 20px;
+}
+
+.encounter-header {
+    text-align: center;
+    color: #ffd700;
+}
+
+.encounter-description {
+    font-size: 1.1em;
+    line-height: 1.4;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.encounter-enemies {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.enemy-entry {
+    background-color: #232323;
+    padding: 15px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.enemy-entry .enemy-type {
+    font-weight: bold;
+    color: #e74c3c;
+}
+
+.enemy-entry .enemy-level {
+    color: #95a5a6;
+}
+
+.encounter-actions {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+}
+
+.encounter-btn {
+    padding: 15px 30px;
+    font-size: 1.2em;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+#engage-btn {
+    background-color: #c0392b;
+    border: none;
+    color: white;
+}
+
+#engage-btn:hover {
+    background-color: #e74c3c;
+}
+
+#flee-btn {
+    background-color: #2c3e50;
+    border: none;
+    color: white;
+}
+
+#flee-btn:hover {
+    background-color: #34495e;
+}
+
+/* Exploration Screen */
+#exploration-screen {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 20px;
+}
+
+.exploration-header {
+    text-align: center;
+}
+
+.exploration-description {
+    font-size: 1.1em;
+    line-height: 1.6;
+    text-align: center;
+    margin: 20px 0;
+    min-height: 100px;
+}
+
+.exploration-actions {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+}
+
+.exploration-actions button {
+    padding: 12px 24px;
+    font-size: 1.1em;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background-color: #2c3e50;
+    border: none;
+    color: white;
+}
+
+.exploration-actions button:hover {
+    background-color: #34495e;
+}
+
+#continue-exploring-btn {
+    background-color: #27ae60;
+}
+
+#continue-exploring-btn:hover {
+    background-color: #2ecc71;
+}
+
+#return-to-town-btn {
+    background-color: #7f8c8d;
+}
+
+#return-to-town-btn:hover {
+    background-color: #95a5a6;
+}
+
+/* Area Selection */
+.explore-section {
+    margin-top: 30px;
+    text-align: center;
+}
+
+.explore-section h2 {
+    color: #ffd700;
+    margin-bottom: 20px;
+}
+
+.area-buttons {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    padding: 0 20px;
+}
+
+.area-btn {
+    padding: 20px;
+    font-size: 1.1em;
+    border: none;
+    border-radius: 8px;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    overflow: hidden;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.area-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    transition: background 0.3s ease;
+}
+
+.area-btn:hover::before {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.area-btn span {
+    position: relative;
+    z-index: 1;
+}
+
+.area-btn.forest {
+    background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), 
+                      linear-gradient(45deg, #2ecc71, #27ae60);
+}
+
+.area-btn.cave {
+    background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), 
+                      linear-gradient(45deg, #34495e, #2c3e50);
+}
+
+.area-btn.desert {
+    background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), 
+                      linear-gradient(45deg, #f1c40f, #f39c12);
+}
+
+.area-btn.swamp {
+    background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), 
+                      linear-gradient(45deg, #8e44ad, #9b59b6);
+}
+
+.area-btn.mountain {
+    background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), 
+                      linear-gradient(45deg, #95a5a6, #7f8c8d);
+}
+
+/* Level requirement overlay */
+.area-btn.locked::after {
+    content: attr(data-level);
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    color: #e74c3c;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9em;
+}
+
+.area-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+/* Responsive combat layout */
+@media (max-width: 768px) {
+    .combat-arena {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr auto;
+    }
+
+    .action-buttons {
+        grid-template-columns: 1fr;
+    }
+
+    .combat-inventory {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
 /* Responsive adjustments */
 @media (max-width: 840px) {
     #game-container {

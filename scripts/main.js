@@ -1,38 +1,30 @@
 // Game state management
-const gameState = {
+export const gameState = {
     player: null,
-    inventory: null,
-    currentDungeon: null
+    inventory: [],
+    quests: [],
+    dungeons: []
 };
 
-// Save and load functionality
-function saveGame() {
-    const saveData = {
-        player: gameState.player,
-        inventory: gameState.inventory
-    };
-    localStorage.setItem('wyvernsQuestSave', JSON.stringify(saveData));
-    console.log('Game saved successfully');
+console.log('main.js loaded, gameState:', gameState);
+
+// Save game state
+export function saveGame() {
+    localStorage.setItem('wyvernQuestSave', JSON.stringify(gameState));
+    console.log('Game saved:', gameState);
 }
 
-function loadGame() {
-    const savedState = localStorage.getItem('wyvernsQuestSave');
+// Load game state
+export function loadGame() {
+    const savedState = localStorage.getItem('wyvernQuestSave');
     if (savedState) {
-        const loadedData = JSON.parse(savedState);
-        gameState.player = loadedData.player;
-        gameState.inventory = loadedData.inventory;
-        console.log('Game loaded successfully');
-        return true;
+        Object.assign(gameState, JSON.parse(savedState));
+        console.log('Game loaded:', gameState);
     }
-    return false;
 }
 
 // Initialize game
-function initGame() {
-    if (!loadGame()) {
-        console.log('No saved game found, ready for new character creation');
-    }
-}
-
-// Start the game
-document.addEventListener('DOMContentLoaded', initGame);
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('main.js: DOM Content Loaded');
+    loadGame();
+});
