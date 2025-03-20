@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wyvern's Quest</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="game-container">
+        <!-- Hub Menu -->
+        <div id="hub-menu" class="screen">
+            <h1>Wyvern's Quest</h1>
+            <button id="character-btn">Character</button>
+            <button id="inventory-btn">Inventory</button>
+            <button id="dungeon-btn">Dungeons</button>
+            <button id="settings-btn">Settings</button>
+            <button id="create-character-btn">New Game</button>
+        </div>
+
+        <!-- Character Creation Screen -->
+        <div id="character-creation" class="screen hidden">
+            <h2>Create Your Character</h2>
+            <div class="creation-section">
+                <h3>Choose Race</h3>
+                <div id="race-selection" class="selection-grid">
+                    <!-- Races will be added by JavaScript -->
+                </div>
+            </div>
+            <div class="creation-section">
+                <h3>Choose Class</h3>
+                <div id="class-selection" class="selection-grid">
+                    <!-- Classes will be added by JavaScript -->
+                </div>
+            </div>
+            <div class="creation-section">
+                <h3>Preview</h3>
+                <div id="character-preview">
+                    <!-- Stats preview will be added by JavaScript -->
+                </div>
+            </div>
+            <div class="button-row">
+                <button id="back-to-menu-btn">Back</button>
+                <button id="create-btn" disabled>Create</button>
+            </div>
+        </div>
+
+        <!-- Character Stats Screen -->
+        <div id="character-stats" class="screen hidden">
+            <h2>Character Sheet</h2>
+            <div id="character-info">
+                <!-- Character info will be added by JavaScript -->
+            </div>
+            <div id="character-stats-display">
+                <!-- Stats will be added by JavaScript -->
+            </div>
+            <div id="character-abilities">
+                <!-- Abilities will be added by JavaScript -->
+            </div>
+            <button id="back-from-stats-btn">Back to Menu</button>
+        </div>
+    </div>
+    <script src="scripts/main.js"></script>
+    <script src="scripts/ui.js"></script>
+    <script src="scripts/character.js"></script>
+    <script src="scripts/dungeon.js"></script>
+    <script src="scripts/combat.js"></script>
+    <script src="scripts/inventory.js"></script>
+    <script src="scripts/quests.js"></script>
+    <script src="scripts/audio.js"></script>
+</body>
+</html>
