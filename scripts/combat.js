@@ -1,5 +1,5 @@
 // Import game state
-import { gameState } from './main.js';
+import { gameState, saveGame } from './main.js';
 import { enemies } from './enemies.js';
 
 // Combat state
@@ -149,8 +149,8 @@ function endCombat(victory) {
         gameState.player.health = Math.floor(gameState.player.maxHealth * 0.5); // Restore 50% health
     }
 
-    // Save game state
-    localStorage.setItem('gameState', JSON.stringify(gameState));
+    // Save game state using the correct key
+    saveGame(); // Use the saveGame function from main.js
 
     // Return to town after 2 seconds
     setTimeout(() => {

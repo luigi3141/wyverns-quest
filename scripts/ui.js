@@ -227,10 +227,13 @@ function initializeCharacterCreation() {
 
         if (selectedRace && selectedClass) {
             console.log('Creating character:', selectedRace, selectedClass);
-            gameState.player = createCharacter(selectedRace, selectedClass);
-            console.log('Character created:', gameState.player);
-            saveGame();
-            showScreen('main-menu');
+            const character = createCharacter(selectedRace, selectedClass);
+            if (character) {
+                gameState.player = character;
+                saveGame(); // Save immediately after character creation
+                showScreen('main-menu');
+                updateCharacterStats();
+            }
         }
     });
 }
@@ -416,43 +419,30 @@ function startCombat(enemyName) {
 function initUI() {
     console.log('Initializing UI...');
     
-    // Get all screen elements
+    // Initialize screens object
     document.querySelectorAll('.screen').forEach(screen => {
         screens[screen.id] = screen;
     });
-    
-    initializeCharacterCreation();
-    initCombatButtons();
-    
-    // Add event listeners for main menu buttons
-    document.getElementById('create-character-btn').addEventListener('click', () => showScreen('character-creation'));
-    document.getElementById('character-btn').addEventListener('click', () => {
-        if (gameState.player) {
-            showScreen('character-stats');
-            updateCharacterStats();
-        } else {
-            alert('Create a character first!');
-        }
-    });
-    document.getElementById('inventory-btn').addEventListener('click', () => {
-        if (gameState.player) {
-            showScreen('inventory-screen');
-            updateInventory();
-        } else {
-            alert('Create a character first!');
-        }
-    });
 
-    // Add event listeners for back buttons
-    document.getElementById('back-to-menu-btn').addEventListener('click', () => showScreen('main-menu'));
-    document.getElementById('back-from-stats-btn').addEventListener('click', () => showScreen('main-menu'));
-    document.getElementById('back-from-inventory-btn').addEventListener('click', () => showScreen('main-menu'));
+    // Initialize character creation
+    initializeCharacterCreation();
 
     // Initialize area buttons
     initializeAreaButtons();
 
-    // Show main menu initially
-    showScreen('main-menu');
+    // Initialize combat buttons
+    initCombatButtons();
+
+    // Update UI based on game state
+    if (gameState.player) {
+        console.log('Player found in game state:', gameState.player);
+        updateCharacterStats();
+        updateAreaButtonStates();
+        showScreen('main-menu');
+    } else {
+        console.log('No player found, showing character creation');
+        showScreen('character-creation');
+    }
 }
 
 // Initialize when DOM is loaded
