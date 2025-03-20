@@ -2,33 +2,194 @@
 import { gameState, saveGame } from './main.js';
 import { races, classes, createCharacter, updateCharacterStats } from './character.js';
 import { updateInventory } from './inventory.js';
+import { startExploring, exploreArea, attemptFlee } from './enemies.js';
+import { startCombat } from './combat.js';
 
 // UI management
-export const screens = {
-    main: document.getElementById('main-menu'),
-    creation: document.getElementById('character-creation'),
-    stats: document.getElementById('character-stats'),
-    combat: document.getElementById('combat-screen'),
-    encounter: document.getElementById('encounter-screen'),
-    exploration: document.getElementById('exploration-screen'),
-    inventory: document.getElementById('inventory-screen')
-};
+let screens = {};
+
+// Initialize UI elements after DOM is loaded
+function initializeScreens() {
+    console.log('Initializing screens...');
+    screens = {
+        main: document.getElementById('main-menu'),
+        creation: document.getElementById('character-creation'),
+        stats: document.getElementById('character-stats'),
+        combat: document.getElementById('combat-screen'),
+        encounter: document.getElementById('encounter-screen'),
+        exploration: document.getElementById('exploration-screen'),
+        inventory: document.getElementById('inventory-screen')
+    };
+
+    // Log found screens
+    Object.entries(screens).forEach(([key, element]) => {
+        console.log(`Screen '${key}': ${element ? 'Found' : 'Not found'}`);
+    });
+}
 
 // Screen management
 export function showScreen(screenId) {
     console.log('Showing screen:', screenId);
-    console.log('Available screens:', screens);
-    document.querySelectorAll('.screen').forEach(screen => screen.classList.add('hidden'));
+    
+    // Verify screens are initialized
+    if (Object.keys(screens).length === 0) {
+        console.warn('Screens not initialized. Initializing now...');
+        initializeScreens();
+    }
+
+    // Verify requested screen exists
+    if (!screens[screenId]) {
+        console.error(`Screen '${screenId}' not found!`);
+        return;
+    }
+
+    // Hide all screens
+    Object.values(screens).forEach(screen => {
+        if (screen) {
+            screen.classList.add('hidden');
+            console.log(`Hiding screen: ${screen.id}`);
+        }
+    });
+
+    // Show requested screen
     screens[screenId].classList.remove('hidden');
+    console.log(`Showing screen: ${screens[screenId].id}`);
 }
 
+// Initialize UI
+function initUI() {
+    console.log('Initializing UI...');
+    initializeScreens();
+
+    // Define all button configurations
+    const buttonConfigs = [
+        {
+            id: 'create-character-btn',
+            handler: () => {
+                console.log('Create character clicked');
+                showScreen('creation');
+            }
+        },
+        {
+            id: 'character-btn',
+            handler: () => {
+                console.log('Character button clicked');
+                if (gameState.player) {
+                    showScreen('stats');
+                    updateCharacterStats();
+                } else {
+                    alert('Create a character first!');
+                }
+            }
+        },
+        {
+            id: 'inventory-btn',
+            handler: () => {
+                console.log('Inventory button clicked');
+                if (gameState.player) {
+                    showScreen('inventory');
+                    updateInventory();
+                } else {
+                    alert('Create a character first!');
+                }
+            }
+        },
+        {
+            id: 'back-to-menu-btn',
+            handler: () => {
+                console.log('Back to menu clicked');
+                showScreen('main');
+            }
+        },
+        {
+            id: 'back-from-stats-btn',
+            handler: () => {
+                console.log('Back from stats clicked');
+                showScreen('main');
+            }
+        },
+        {
+            id: 'back-from-inventory-btn',
+            handler: () => {
+                console.log('Back from inventory clicked');
+                showScreen('main');
+            }
+        },
+        {
+            id: 'engage-btn',
+            handler: () => {
+                console.log('Engage clicked');
+                showScreen('combat');
+                startCombat(gameState.player, gameState.currentEncounter.enemies);
+            }
+        },
+        {
+            id: 'flee-btn',
+            handler: () => {
+                console.log('Flee clicked');
+                attemptFlee();
+            }
+        }
+    ];
+
+    // Initialize area exploration buttons
+    const areas = ['forest', 'cave', 'desert', 'swamp', 'mountain'];
+    const areaLevels = { forest: 1, cave: 3, desert: 5, swamp: 7, mountain: 10 };
+
+    areas.forEach(area => {
+        buttonConfigs.push({
+            id: `explore-${area}-btn`,
+            handler: () => {
+                console.log(`Explore ${area} clicked`);
+                if (!gameState.player) {
+                    alert('Create a character first!');
+                    return;
+                }
+
+                if (gameState.player.level < areaLevels[area]) {
+                    alert(`You need to be level ${areaLevels[area]} to explore the ${area}!`);
+                    return;
+                }
+
+                startExploring(gameState.player, area);
+            }
+        });
+    });
+
+    // Add event listeners to all buttons
+    buttonConfigs.forEach(({ id, handler }) => {
+        const button = document.getElementById(id);
+        if (button) {
+            console.log(`Adding event listener to: ${id}`);
+            button.addEventListener('click', handler);
+        } else {
+            console.error(`Button not found: ${id}`);
+        }
+    });
+
+    // Show initial screen
+    showScreen('main');
+}
+
+// Initialize when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM Content Loaded');
+    initUI();
+    initializeCharacterCreation();
+});
+
 // Initialize character creation UI
-export function initializeCharacterCreation() {
+function initializeCharacterCreation() {
     console.log('Initializing character creation');
     const raceSelection = document.getElementById('race-selection');
     const classSelection = document.getElementById('class-selection');
     const preview = document.getElementById('character-preview');
     const createBtn = document.getElementById('create-btn');
+
+    if (!raceSelection || !classSelection || !preview || !createBtn) {
+        console.error('Character creation elements not found!');
+        return;
+    }
 
     // Add race options
     Object.entries(races).forEach(([id, race]) => {
@@ -159,113 +320,14 @@ export function updateCharacterStats() {
     `;
 }
 
-// Event Listeners
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('DOM Content Loaded in ui.js');
-    
-    // Initialize character creation screen
-    initializeCharacterCreation();
-
-    // Hub menu buttons
-    const createCharacterBtn = document.getElementById('create-character-btn');
-    console.log('Create character button:', createCharacterBtn);
-    
-    if (createCharacterBtn) {
-        createCharacterBtn.addEventListener('click', () => {
-            console.log('Create character button clicked');
-            showScreen('creation');
-        });
-    }
-
-    const characterBtn = document.getElementById('character-btn');
-    console.log('Character button:', characterBtn);
-    
-    if (characterBtn) {
-        characterBtn.addEventListener('click', () => {
-            console.log('Character button clicked');
-            if (gameState.player) {
-                showScreen('stats');
-                updateCharacterStats();
-            } else {
-                alert('Create a character first!');
-            }
-        });
-    }
-
-    const inventoryBtn = document.getElementById('inventory-btn');
-    console.log('Inventory button:', inventoryBtn);
-    
-    if (inventoryBtn) {
-        inventoryBtn.addEventListener('click', () => {
-            console.log('Inventory button clicked');
-            if (gameState.player) {
-                showScreen('inventory');
-                updateInventory();
-            } else {
-                alert('Create a character first!');
-            }
-        });
-    }
-
-    // Back buttons
-    const backToMenuBtn = document.getElementById('back-to-menu-btn');
-    console.log('Back to menu button:', backToMenuBtn);
-    
-    if (backToMenuBtn) {
-        backToMenuBtn.addEventListener('click', () => {
-            console.log('Back to menu button clicked');
-            showScreen('main');
-        });
-    }
-
-    const backFromStatsBtn = document.getElementById('back-from-stats-btn');
-    console.log('Back from stats button:', backFromStatsBtn);
-    
-    if (backFromStatsBtn) {
-        backFromStatsBtn.addEventListener('click', () => {
-            console.log('Back from stats button clicked');
-            showScreen('main');
-        });
-    }
-
-    // Show initial screen
-    showScreen('main');
-});
-
 // Handle combat end
 export function handleCombatEnd(state) {
     if (state.victory) {
-        // Collect loot
-        const loot = state.turnOrder.slice(1).reduce((items, enemy) => {
-            if (enemy.drops) items.push(...enemy.drops);
-            return items;
-        }, []);
-
-        // Add gold
-        const gold = state.turnOrder.slice(1).reduce((total, enemy) => total + enemy.gold, 0);
-        gameState.player.gold += gold;
-
-        if (loot.length > 0) {
-            if (!gameState.player.inventory) gameState.player.inventory = [];
-            gameState.player.inventory.push(...loot);
-            state.log.push(`Found: ${loot.join(', ')}`);
-        }
-        state.log.push(`Found ${gold} gold!`);
-
-        // Show victory screen after delay
-        setTimeout(() => {
-            alert('Victory! You can now return to exploring.');
-            document.querySelectorAll('.screen').forEach(screen => screen.classList.add('hidden'));
-            document.getElementById('main-menu').classList.remove('hidden');
-        }, 2000);
+        alert('Victory! You gained experience and loot!');
     } else {
-        // Show defeat screen after delay
-        setTimeout(() => {
-            alert('You have been defeated! Returning to town...');
-            document.querySelectorAll('.screen').forEach(screen => screen.classList.add('hidden'));
-            document.getElementById('main-menu').classList.remove('hidden');
-        }, 2000);
+        alert('Defeat! You lost some items...');
     }
+    showScreen('main');
 }
 
 // Add combat end observer

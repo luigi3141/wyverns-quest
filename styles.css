@@ -1,3 +1,49 @@
+/* Global Styles */
+:root {
+    --primary-color: #4a4a4a;
+    --secondary-color: #6a6a6a;
+    --accent-color: #8a8a8a;
+    --background-color: #f5f5f5;
+    --text-color: #2a2a2a;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    line-height: 1.6;
+    background-color: var(--background-color);
+    color: var(--text-color);
+}
+
+h1, h2, h3, h4 {
+    font-family: 'Cinzel', serif;
+    margin-bottom: 1rem;
+}
+
+button {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 4px;
+    background-color: var(--primary-color);
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+button:hover {
+    background-color: var(--secondary-color);
+}
+
+button:disabled {
+    background-color: var(--accent-color);
+    cursor: not-allowed;
+}
+
 /* Base styles */
 body {
     margin: 0;

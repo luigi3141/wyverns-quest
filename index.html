@@ -20,135 +20,104 @@
             <div class="explore-section">
                 <h2>Explore Areas</h2>
                 <div class="area-buttons">
-                    <button id="explore-forest-btn" class="area-btn forest">Forest</button>
-                    <button id="explore-cave-btn" class="area-btn cave">Dark Cave</button>
-                    <button id="explore-desert-btn" class="area-btn desert">Desert</button>
-                    <button id="explore-swamp-btn" class="area-btn swamp">Swamp</button>
-                    <button id="explore-mountain-btn" class="area-btn mountain">Mountains</button>
+                    <button id="explore-forest-btn">Forest (Level 1+)</button>
+                    <button id="explore-cave-btn">Cave (Level 3+)</button>
+                    <button id="explore-desert-btn">Desert (Level 5+)</button>
+                    <button id="explore-swamp-btn">Swamp (Level 7+)</button>
+                    <button id="explore-mountain-btn">Mountain (Level 10+)</button>
                 </div>
             </div>
         </div>
 
-        <!-- Character Creation Screen -->
+        <!-- Character Creation -->
         <div id="character-creation" class="screen hidden">
             <h2>Create Your Character</h2>
-            <div class="creation-section">
-                <h3>Choose Race</h3>
-                <div id="race-selection" class="selection-grid">
-                    <!-- Races will be added by JavaScript -->
+            <div class="creation-container">
+                <div class="selection-section">
+                    <h3>Choose Your Race</h3>
+                    <div id="race-selection" class="selection-grid"></div>
                 </div>
-            </div>
-            <div class="creation-section">
-                <h3>Choose Class</h3>
-                <div id="class-selection" class="selection-grid">
-                    <!-- Classes will be added by JavaScript -->
+                <div class="selection-section">
+                    <h3>Choose Your Class</h3>
+                    <div id="class-selection" class="selection-grid"></div>
                 </div>
-            </div>
-            <div class="creation-section">
-                <h3>Preview</h3>
-                <div id="character-preview">
-                    <!-- Stats preview will be added by JavaScript -->
+                <div class="preview-section">
+                    <h3>Preview</h3>
+                    <div id="character-preview"></div>
+                    <button id="create-btn" disabled>Create</button>
+                    <button id="back-to-menu-btn">Back</button>
                 </div>
-            </div>
-            <div class="button-row">
-                <button id="back-to-menu-btn">Back</button>
-                <button id="create-btn" disabled>Create</button>
             </div>
         </div>
 
-        <!-- Character Stats Screen -->
+        <!-- Character Stats -->
         <div id="character-stats" class="screen hidden">
             <h2>Character Sheet</h2>
-            <div id="character-info">
-                <!-- Character info will be added by JavaScript -->
-            </div>
-            <div id="character-stats-display">
-                <!-- Stats will be added by JavaScript -->
-            </div>
-            <div id="character-abilities">
-                <!-- Abilities will be added by JavaScript -->
-            </div>
-            <button id="back-from-stats-btn">Back to Menu</button>
+            <div id="character-info"></div>
+            <div id="character-stats-display"></div>
+            <button id="back-from-stats-btn">Back</button>
         </div>
 
-        <!-- Combat Screen -->
-        <div id="combat-screen" class="screen hidden">
-            <div class="combat-header">
-                <h2>Combat</h2>
-                <div class="turn-indicator">Round: <span id="round-counter">1</span></div>
-            </div>
-            
-            <div class="combat-arena">
-                <div class="combatant player">
-                    <div class="combatant-info">
-                        <h3 id="player-name">Player</h3>
-                        <div class="health-bar">
-                            <div class="health-fill" id="player-health"></div>
-                            <span class="health-text" id="player-health-text">100/100</span>
-                        </div>
-                        <div class="mana-bar">
-                            <div class="mana-fill" id="player-mana"></div>
-                            <span class="mana-text" id="player-mana-text">50/50</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="combat-log" id="combat-log">
-                    <!-- Combat messages will be added here -->
-                </div>
-
-                <div class="combatant enemy">
-                    <div class="combatant-info">
-                        <h3 id="enemy-name">Enemy</h3>
-                        <div class="health-bar">
-                            <div class="health-fill" id="enemy-health"></div>
-                            <span class="health-text" id="enemy-health-text">100/100</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="combat-controls">
-                <div class="action-buttons">
-                    <button id="attack-btn" class="combat-btn">Attack</button>
-                    <button id="ability-btn" class="combat-btn">Ability</button>
-                    <button id="defend-btn" class="combat-btn">Defend</button>
-                    <button id="item-btn" class="combat-btn">Use Item</button>
-                </div>
-                <div class="combat-inventory" id="combat-inventory">
-                    <!-- Items will be shown here when item button is clicked -->
-                </div>
-            </div>
-        </div>
-
-        <!-- Encounter Screen -->
-        <div id="encounter-screen" class="screen hidden">
-            <div class="encounter-header">
-                <h2>Encounter!</h2>
-            </div>
-            <div class="encounter-description" id="encounter-description">
-                <!-- Encounter description will be added here -->
-            </div>
-            <div class="encounter-enemies" id="encounter-enemies">
-                <!-- Enemy list will be added here -->
-            </div>
-            <div class="encounter-actions">
-                <button id="engage-btn" class="encounter-btn">Attack!</button>
-                <button id="flee-btn" class="encounter-btn">Attempt to Flee</button>
-            </div>
+        <!-- Inventory Screen -->
+        <div id="inventory-screen" class="screen hidden">
+            <h2>Inventory</h2>
+            <div id="inventory"></div>
+            <button id="back-from-inventory-btn">Back</button>
         </div>
 
         <!-- Exploration Screen -->
         <div id="exploration-screen" class="screen hidden">
-            <div class="exploration-header">
-                <h2>Exploring <span id="current-location">Forest</span></h2>
+            <h2>Exploring <span id="current-location">Forest</span></h2>
+            <div id="exploration-description"></div>
+            <button id="continue-exploring-btn">Continue Exploring</button>
+            <button id="return-to-town-btn">Return to Town</button>
+        </div>
+
+        <!-- Encounter Screen -->
+        <div id="encounter-screen" class="screen hidden">
+            <h2>Encounter!</h2>
+            <div id="encounter-description"></div>
+            <div class="encounter-buttons">
+                <button id="engage-btn">Fight!</button>
+                <button id="flee-btn">Flee</button>
             </div>
-            <div class="exploration-description" id="exploration-description">
-                You are exploring the area...
-            </div>
-            <div class="exploration-actions">
-                <button id="continue-exploring-btn">Continue Exploring</button>
-                <button id="return-to-town-btn">Return to Town</button>
+        </div>
+
+        <!-- Combat Screen -->
+        <div id="combat-screen" class="screen hidden">
+            <div class="combat-container">
+                <div class="combat-header">
+                    <h2>Combat</h2>
+                    <div id="round-counter">Round: 1</div>
+                </div>
+                <div class="combat-participants">
+                    <div class="player-info">
+                        <h3>Player</h3>
+                        <div class="health-bar">
+                            <div class="health-fill"></div>
+                        </div>
+                        <div class="stats">
+                            <p>HP: <span id="player-hp">100</span>/<span id="player-max-hp">100</span></p>
+                            <p>MP: <span id="player-mp">50</span>/<span id="player-max-mp">50</span></p>
+                        </div>
+                    </div>
+                    <div class="enemy-info">
+                        <h3>Enemy</h3>
+                        <div class="health-bar">
+                            <div class="health-fill"></div>
+                        </div>
+                        <div class="stats">
+                            <p>HP: <span id="enemy-hp">50</span>/<span id="enemy-max-hp">50</span></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="combat-log" id="combat-log"></div>
+                <div class="combat-actions">
+                    <button id="attack-btn">Attack</button>
+                    <button id="ability-btn">Use Ability</button>
+                    <button id="defend-btn">Defend</button>
+                    <button id="item-btn">Use Item</button>
+                </div>
             </div>
         </div>
     </div>
@@ -157,6 +126,7 @@
     <script type="module" src="scripts/character.js"></script>
     <script type="module" src="scripts/dungeon.js"></script>
     <script type="module" src="scripts/combat.js"></script>
+    <script type="module" src="scripts/enemies.js"></script>
     <script type="module" src="scripts/inventory.js"></script>
     <script type="module" src="scripts/quests.js"></script>
     <script type="module" src="scripts/audio.js"></script>
