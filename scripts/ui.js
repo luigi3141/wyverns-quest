@@ -1,182 +1,149 @@
 // Import dependencies
 import { gameState, saveGame } from './main.js';
-import { races, classes, createCharacter, updateCharacterStats } from './character.js';
-import { updateInventory } from './inventory.js';
-import { startExploring, exploreArea, attemptFlee } from './enemies.js';
-import { startCombat } from './combat.js';
+import { races, classes, createCharacter } from './character.js';
+import { startCombat as initiateCombat, initCombatButtons } from './combat.js';
+
+console.log('UI module loaded');
 
 // UI management
 let screens = {};
 
-// Initialize UI elements after DOM is loaded
-function initializeScreens() {
-    console.log('Initializing screens...');
-    screens = {
-        main: document.getElementById('main-menu'),
-        creation: document.getElementById('character-creation'),
-        stats: document.getElementById('character-stats'),
-        combat: document.getElementById('combat-screen'),
-        encounter: document.getElementById('encounter-screen'),
-        exploration: document.getElementById('exploration-screen'),
-        inventory: document.getElementById('inventory-screen')
-    };
+// Area definitions
+const areas = {
+    forest: {
+        name: 'Forest',
+        minLevel: 1,
+        maxLevel: 5,
+        description: 'A dense forest teeming with wildlife and basic monsters.',
+        encounters: ['Wolf', 'Bandit', 'Giant Spider']
+    },
+    cave: {
+        name: 'Cave System',
+        minLevel: 3,
+        maxLevel: 8,
+        description: 'Dark caves with stronger creatures and better loot.',
+        encounters: ['Goblin', 'Cave Bear', 'Rock Elemental']
+    },
+    mountain: {
+        name: 'Mountain Peak',
+        minLevel: 6,
+        maxLevel: 12,
+        description: 'Treacherous peaks with powerful enemies.',
+        encounters: ['Harpy', 'Frost Giant', 'Dragon Wyrmling']
+    },
+    ruins: {
+        name: 'Ancient Ruins',
+        minLevel: 10,
+        maxLevel: 15,
+        description: 'Mysterious ruins filled with undead and magical foes.',
+        encounters: ['Skeleton Warrior', 'Ghost', 'Lich']
+    },
+    dungeon: {
+        name: 'Forgotten Dungeon',
+        minLevel: 15,
+        maxLevel: 20,
+        description: 'A challenging dungeon with the toughest enemies.',
+        encounters: ['Dark Knight', 'Demon', 'Ancient Dragon']
+    }
+};
 
-    // Log found screens
-    Object.entries(screens).forEach(([key, element]) => {
-        console.log(`Screen '${key}': ${element ? 'Found' : 'Not found'}`);
-    });
-}
+// Current exploration state
+let currentArea = null;
+let exploring = false;
 
-// Screen management
-export function showScreen(screenId) {
+// Show a specific screen
+function showScreen(screenId) {
     console.log('Showing screen:', screenId);
     
-    // Verify screens are initialized
-    if (Object.keys(screens).length === 0) {
-        console.warn('Screens not initialized. Initializing now...');
-        initializeScreens();
-    }
+    // Hide all screens first
+    document.querySelectorAll('.screen').forEach(screen => {
+        screen.classList.add('hidden');
+    });
 
-    // Verify requested screen exists
-    if (!screens[screenId]) {
-        console.error(`Screen '${screenId}' not found!`);
+    // Show the requested screen
+    const targetScreen = document.getElementById(screenId);
+    if (targetScreen) {
+        targetScreen.classList.remove('hidden');
+    } else {
+        console.error(`Screen not found: ${screenId}`);
+    }
+}
+
+// Update character stats display
+function updateCharacterStats() {
+    console.log('Updating character stats');
+    const characterInfo = document.getElementById('character-info');
+    const statsDisplay = document.getElementById('character-stats-display');
+    
+    if (!gameState.player) {
+        console.error('No player character found!');
         return;
     }
 
-    // Hide all screens
-    Object.values(screens).forEach(screen => {
-        if (screen) {
-            screen.classList.add('hidden');
-            console.log(`Hiding screen: ${screen.id}`);
-        }
-    });
+    const race = races[gameState.player.race];
+    const characterClass = classes[gameState.player.class];
 
-    // Show requested screen
-    screens[screenId].classList.remove('hidden');
-    console.log(`Showing screen: ${screens[screenId].id}`);
+    characterInfo.innerHTML = `
+        <h3>${race.name} ${characterClass.name}</h3>
+        <p>Level ${gameState.player.level}</p>
+        <p>XP: ${gameState.player.xp} / ${gameState.player.xpToNext}</p>
+        <p>Gold: ${gameState.player.gold}</p>
+    `;
+
+    statsDisplay.innerHTML = `
+        <div class="stats-grid">
+            <div class="stat-item">
+                <label>Health:</label>
+                <span>${gameState.player.stats.health} / ${gameState.player.stats.maxHealth}</span>
+            </div>
+            <div class="stat-item">
+                <label>Strength:</label>
+                <span>${gameState.player.stats.strength}</span>
+            </div>
+            <div class="stat-item">
+                <label>Agility:</label>
+                <span>${gameState.player.stats.agility}</span>
+            </div>
+            <div class="stat-item">
+                <label>Intelligence:</label>
+                <span>${gameState.player.stats.intelligence}</span>
+            </div>
+            <div class="stat-item">
+                <label>Charisma:</label>
+                <span>${gameState.player.stats.charisma}</span>
+            </div>
+        </div>
+    `;
 }
 
-// Initialize UI
-function initUI() {
-    console.log('Initializing UI...');
-    initializeScreens();
+// Update inventory display
+function updateInventory() {
+    console.log('Updating inventory');
+    const inventoryDiv = document.getElementById('inventory');
+    
+    if (!gameState.player) {
+        console.error('No player character found!');
+        return;
+    }
 
-    // Define all button configurations
-    const buttonConfigs = [
-        {
-            id: 'create-character-btn',
-            handler: () => {
-                console.log('Create character clicked');
-                showScreen('creation');
-            }
-        },
-        {
-            id: 'character-btn',
-            handler: () => {
-                console.log('Character button clicked');
-                if (gameState.player) {
-                    showScreen('stats');
-                    updateCharacterStats();
-                } else {
-                    alert('Create a character first!');
-                }
-            }
-        },
-        {
-            id: 'inventory-btn',
-            handler: () => {
-                console.log('Inventory button clicked');
-                if (gameState.player) {
-                    showScreen('inventory');
-                    updateInventory();
-                } else {
-                    alert('Create a character first!');
-                }
-            }
-        },
-        {
-            id: 'back-to-menu-btn',
-            handler: () => {
-                console.log('Back to menu clicked');
-                showScreen('main');
-            }
-        },
-        {
-            id: 'back-from-stats-btn',
-            handler: () => {
-                console.log('Back from stats clicked');
-                showScreen('main');
-            }
-        },
-        {
-            id: 'back-from-inventory-btn',
-            handler: () => {
-                console.log('Back from inventory clicked');
-                showScreen('main');
-            }
-        },
-        {
-            id: 'engage-btn',
-            handler: () => {
-                console.log('Engage clicked');
-                showScreen('combat');
-                startCombat(gameState.player, gameState.currentEncounter.enemies);
-            }
-        },
-        {
-            id: 'flee-btn',
-            handler: () => {
-                console.log('Flee clicked');
-                attemptFlee();
-            }
-        }
-    ];
+    if (gameState.player.inventory.length === 0) {
+        inventoryDiv.innerHTML = '<p>Your inventory is empty.</p>';
+        return;
+    }
 
-    // Initialize area exploration buttons
-    const areas = ['forest', 'cave', 'desert', 'swamp', 'mountain'];
-    const areaLevels = { forest: 1, cave: 3, desert: 5, swamp: 7, mountain: 10 };
+    const itemsList = gameState.player.inventory.map(item => `
+        <div class="inventory-item">
+            <h4>${item.name}</h4>
+            <p>${item.description || ''}</p>
+        </div>
+    `).join('');
 
-    areas.forEach(area => {
-        buttonConfigs.push({
-            id: `explore-${area}-btn`,
-            handler: () => {
-                console.log(`Explore ${area} clicked`);
-                if (!gameState.player) {
-                    alert('Create a character first!');
-                    return;
-                }
-
-                if (gameState.player.level < areaLevels[area]) {
-                    alert(`You need to be level ${areaLevels[area]} to explore the ${area}!`);
-                    return;
-                }
-
-                startExploring(gameState.player, area);
-            }
-        });
-    });
-
-    // Add event listeners to all buttons
-    buttonConfigs.forEach(({ id, handler }) => {
-        const button = document.getElementById(id);
-        if (button) {
-            console.log(`Adding event listener to: ${id}`);
-            button.addEventListener('click', handler);
-        } else {
-            console.error(`Button not found: ${id}`);
-        }
-    });
-
-    // Show initial screen
-    showScreen('main');
+    inventoryDiv.innerHTML = `
+        <div class="inventory-grid">
+            ${itemsList}
+        </div>
+    `;
 }
-
-// Initialize when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('DOM Content Loaded');
-    initUI();
-    initializeCharacterCreation();
-});
 
 // Initialize character creation UI
 function initializeCharacterCreation() {
@@ -190,6 +157,10 @@ function initializeCharacterCreation() {
         console.error('Character creation elements not found!');
         return;
     }
+
+    // Clear existing options
+    raceSelection.innerHTML = '';
+    classSelection.innerHTML = '';
 
     // Add race options
     Object.entries(races).forEach(([id, race]) => {
@@ -259,81 +230,233 @@ function initializeCharacterCreation() {
             gameState.player = createCharacter(selectedRace, selectedClass);
             console.log('Character created:', gameState.player);
             saveGame();
-            showScreen('main');
+            showScreen('main-menu');
         }
     });
 }
 
-// Character stats display
-export function updateCharacterStats() {
+// Initialize area buttons
+function initializeAreaButtons() {
+    console.log('Initializing area buttons');
+    const areaContainer = document.getElementById('area-buttons');
+    if (!areaContainer) {
+        console.error('Area container not found!');
+        return;
+    }
+
+    // Clear existing buttons
+    areaContainer.innerHTML = '';
+
+    // Create area buttons
+    Object.entries(areas).forEach(([id, area]) => {
+        const button = document.createElement('button');
+        button.id = `explore-${id}-btn`;
+        button.className = 'area-button';
+        button.innerHTML = `
+            <h4>${area.name}</h4>
+            <p>${area.description}</p>
+            <small>Level ${area.minLevel}-${area.maxLevel}</small>
+        `;
+
+        // Check if player meets level requirement
+        const isLocked = !gameState.player || gameState.player.level < area.minLevel;
+        if (isLocked) {
+            button.disabled = true;
+            button.classList.add('locked');
+            if (!gameState.player) {
+                button.title = 'Create a character first!';
+            } else {
+                button.title = `Requires level ${area.minLevel}`;
+                button.innerHTML += `<div class="level-requirement">Required Level: ${area.minLevel}</div>`;
+            }
+        }
+
+        button.addEventListener('click', () => {
+            console.log(`Exploring ${area.name}`);
+            exploreArea(id);
+        });
+
+        areaContainer.appendChild(button);
+    });
+
+    // Update button states when player is created/updated
+    if (gameState.player) {
+        console.log('Player level:', gameState.player.level);
+        updateAreaButtonStates();
+    }
+}
+
+// Update area button states based on player level
+function updateAreaButtonStates() {
     if (!gameState.player) return;
 
-    const info = document.getElementById('character-info');
-    const statsDisplay = document.getElementById('character-stats-display');
-    const abilities = document.getElementById('character-abilities');
-
-    // Update basic info
-    info.innerHTML = `
-        <h3>${gameState.player.race} ${gameState.player.class}</h3>
-        <p>Level ${gameState.player.level}</p>
-        <p>XP: ${gameState.player.xp} / ${gameState.player.xpToNext}</p>
-    `;
-
-    // Update stats
-    statsDisplay.innerHTML = `
-        <div class="stat-item">
-            <h4>Health</h4>
-            <p>${gameState.player.stats.health} / ${gameState.player.stats.maxHealth}</p>
-        </div>
-        <div class="stat-item">
-            <h4>Mana</h4>
-            <p>${gameState.player.stats.mana} / ${gameState.player.stats.maxMana}</p>
-        </div>
-        <div class="stat-item">
-            <h4>Strength</h4>
-            <p>${gameState.player.stats.strength}</p>
-        </div>
-        <div class="stat-item">
-            <h4>Agility</h4>
-            <p>${gameState.player.stats.agility}</p>
-        </div>
-        <div class="stat-item">
-            <h4>Intelligence</h4>
-            <p>${gameState.player.stats.intelligence}</p>
-        </div>
-        <div class="stat-item">
-            <h4>Charisma</h4>
-            <p>${gameState.player.stats.charisma}</p>
-        </div>
-    `;
-
-    // Update abilities
-    abilities.innerHTML = `
-        <h3>Abilities</h3>
-        ${gameState.player.abilities.map(ability => `
-            <div class="ability-item">
-                <h4>${ability.name}</h4>
-                <p>${ability.description}</p>
-                <p>Cooldown: ${ability.cooldown} turns</p>
-            </div>
-        `).join('')}
-    `;
+    Object.entries(areas).forEach(([id, area]) => {
+        const button = document.getElementById(`explore-${id}-btn`);
+        if (button) {
+            const isLocked = gameState.player.level < area.minLevel;
+            button.disabled = isLocked;
+            button.classList.toggle('locked', isLocked);
+            if (isLocked) {
+                button.title = `Requires level ${area.minLevel}`;
+            } else {
+                button.title = '';
+            }
+        }
+    });
 }
 
-// Handle combat end
-export function handleCombatEnd(state) {
-    if (state.victory) {
-        alert('Victory! You gained experience and loot!');
-    } else {
-        alert('Defeat! You lost some items...');
+// Handle area exploration
+function exploreArea(areaId) {
+    const area = areas[areaId];
+    if (!area) {
+        console.error(`Area ${areaId} not found!`);
+        return;
     }
-    showScreen('main');
+
+    if (!gameState.player) {
+        alert('Create a character first!');
+        return;
+    }
+
+    if (gameState.player.level < area.minLevel) {
+        alert(`You need to be level ${area.minLevel} to explore this area!`);
+        return;
+    }
+
+    console.log(`Starting exploration in ${area.name}`);
+    currentArea = area;
+    exploring = true;
+    
+    // Update exploration screen
+    const locationSpan = document.getElementById('current-location');
+    const descriptionDiv = document.getElementById('exploration-description');
+    
+    if (locationSpan) locationSpan.textContent = area.name;
+    if (descriptionDiv) {
+        descriptionDiv.innerHTML = `
+            <p>${area.description}</p>
+            <p>Level Range: ${area.minLevel}-${area.maxLevel}</p>
+            <p>Possible Encounters: ${area.encounters.join(', ')}</p>
+        `;
+    }
+
+    showScreen('exploration-screen');
+
+    // Add event listeners for exploration buttons
+    const continueBtn = document.getElementById('continue-exploring-btn');
+    const returnBtn = document.getElementById('return-to-town-btn');
+
+    if (continueBtn) {
+        continueBtn.onclick = () => {
+            if (Math.random() < 0.7) { // 70% chance of encounter
+                startEncounter();
+            } else {
+                // Found nothing
+                descriptionDiv.innerHTML += '<p>You continue exploring but find nothing of interest...</p>';
+            }
+        };
+    }
+
+    if (returnBtn) {
+        returnBtn.onclick = () => {
+            exploring = false;
+            currentArea = null;
+            showScreen('main-menu');
+        };
+    }
 }
 
-// Add combat end observer
-setInterval(() => {
-    if (currentCombatState?.ended && !currentCombatState.processed) {
-        currentCombatState.processed = true;
-        handleCombatEnd(currentCombatState);
+// Start an encounter
+function startEncounter() {
+    if (!currentArea) return;
+
+    const encounter = currentArea.encounters[Math.floor(Math.random() * currentArea.encounters.length)];
+    const encounterDesc = document.getElementById('encounter-description');
+    
+    if (encounterDesc) {
+        encounterDesc.innerHTML = `
+            <p>You encountered a ${encounter}!</p>
+            <p>What would you like to do?</p>
+        `;
     }
-}, 100);
+
+    showScreen('encounter-screen');
+
+    // Add event listeners for encounter buttons
+    const engageBtn = document.getElementById('engage-btn');
+    const fleeBtn = document.getElementById('flee-btn');
+
+    if (engageBtn) {
+        engageBtn.onclick = () => {
+            startCombat(encounter);
+        };
+    }
+
+    if (fleeBtn) {
+        fleeBtn.onclick = () => {
+            if (Math.random() < 0.7) { // 70% chance to flee
+                alert('You successfully fled from the encounter!');
+                showScreen('exploration-screen');
+            } else {
+                alert('Failed to flee! You must fight!');
+                startCombat(encounter);
+            }
+        };
+    }
+}
+
+// Start combat
+function startCombat(enemyName) {
+    console.log(`Starting combat with ${enemyName}`);
+    showScreen('combat-screen');
+    initiateCombat(enemyName);
+}
+
+// Initialize UI elements after DOM is loaded
+function initUI() {
+    console.log('Initializing UI...');
+    
+    // Get all screen elements
+    document.querySelectorAll('.screen').forEach(screen => {
+        screens[screen.id] = screen;
+    });
+    
+    initializeCharacterCreation();
+    initCombatButtons();
+    
+    // Add event listeners for main menu buttons
+    document.getElementById('create-character-btn').addEventListener('click', () => showScreen('character-creation'));
+    document.getElementById('character-btn').addEventListener('click', () => {
+        if (gameState.player) {
+            showScreen('character-stats');
+            updateCharacterStats();
+        } else {
+            alert('Create a character first!');
+        }
+    });
+    document.getElementById('inventory-btn').addEventListener('click', () => {
+        if (gameState.player) {
+            showScreen('inventory-screen');
+            updateInventory();
+        } else {
+            alert('Create a character first!');
+        }
+    });
+
+    // Add event listeners for back buttons
+    document.getElementById('back-to-menu-btn').addEventListener('click', () => showScreen('main-menu'));
+    document.getElementById('back-from-stats-btn').addEventListener('click', () => showScreen('main-menu'));
+    document.getElementById('back-from-inventory-btn').addEventListener('click', () => showScreen('main-menu'));
+
+    // Initialize area buttons
+    initializeAreaButtons();
+
+    // Show main menu initially
+    showScreen('main-menu');
+}
+
+// Initialize when DOM is loaded
+window.addEventListener('load', () => {
+    console.log('Window loaded');
+    initUI();
+});

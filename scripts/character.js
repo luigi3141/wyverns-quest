@@ -3,81 +3,163 @@ import { gameState } from './main.js';
 
 // Character creation data
 export const races = {
-    human: { 
-        name: 'Human', 
-        stats: { strength: 10, agility: 10, intelligence: 10, charisma: 12 }, 
-        bonus: '10% better NPC trades' 
-    },
-    elf: { 
-        name: 'Elf', 
-        stats: { strength: 8, agility: 14, intelligence: 12, charisma: 10 }, 
-        bonus: '10% ranged damage' 
-    },
-    dwarf: { 
-        name: 'Dwarf', 
-        stats: { strength: 12, agility: 8, intelligence: 10, charisma: 12 }, 
-        bonus: '10% crafting success' 
-    },
-    orc: { 
-        name: 'Orc', 
-        stats: { strength: 14, agility: 10, intelligence: 8, charisma: 10 }, 
-        bonus: '10% melee damage' 
-    }
-};
-
-export const classes = {
-    warrior: { 
-        name: 'Warrior', 
-        ability: 'Cleave', 
-        stats: { strength: +2, agility: +1, intelligence: 0, charisma: 0 } 
-    },
-    ranger: { 
-        name: 'Ranger', 
-        ability: 'Quick Shot', 
-        stats: { strength: 0, agility: +2, intelligence: +1, charisma: 0 } 
-    },
-    mage: { 
-        name: 'Mage', 
-        ability: 'Fireball', 
-        stats: { strength: -1, agility: 0, intelligence: +3, charisma: +1 } 
-    },
-    cleric: { 
-        name: 'Cleric', 
-        ability: 'Heal', 
-        stats: { strength: +1, agility: 0, intelligence: +1, charisma: +1 } 
-    }
-};
-
-export function calculateXPForLevel(level) {
-    return Math.floor(100 * Math.pow(1.5, level - 1));
-}
-
-export function createCharacter(race, charClass) {
-    if (!races[race] || !classes[charClass]) {
-        console.error('Invalid race or class');
-        return null;
-    }
-
-    const baseStats = races[race].stats;
-    const classBonus = classes[charClass].stats;
-
-    return {
-        race,
-        class: charClass,
-        level: 1,
-        xp: 0,
-        xpToNext: calculateXPForLevel(2),
-        gold: 50,
+    human: {
+        name: 'Human',
+        bonus: 'Versatile - Balanced stats',
         stats: {
-            strength: baseStats.strength + classBonus.strength,
-            agility: baseStats.agility + classBonus.agility,
-            intelligence: baseStats.intelligence + classBonus.intelligence,
-            charisma: baseStats.charisma + classBonus.charisma,
+            strength: 5,
+            agility: 5,
+            intelligence: 5,
+            charisma: 5,
             health: 100,
             maxHealth: 100,
             mana: 50,
             maxMana: 50
-        },
-        inventory: []
+        }
+    },
+    elf: {
+        name: 'Elf',
+        bonus: 'Agile - High agility and intelligence',
+        stats: {
+            strength: 3,
+            agility: 7,
+            intelligence: 6,
+            charisma: 4,
+            health: 90,
+            maxHealth: 90,
+            mana: 70,
+            maxMana: 70
+        }
+    },
+    dwarf: {
+        name: 'Dwarf',
+        bonus: 'Hardy - High strength and health',
+        stats: {
+            strength: 7,
+            agility: 3,
+            intelligence: 4,
+            charisma: 6,
+            health: 120,
+            maxHealth: 120,
+            mana: 40,
+            maxMana: 40
+        }
+    },
+    orc: {
+        name: 'Orc',
+        bonus: 'Powerful - Highest strength',
+        stats: {
+            strength: 8,
+            agility: 4,
+            intelligence: 3,
+            charisma: 5,
+            health: 110,
+            maxHealth: 110,
+            mana: 30,
+            maxMana: 30
+        }
+    }
+};
+
+export const classes = {
+    warrior: {
+        name: 'Warrior',
+        ability: 'Berserk - Increased damage at low health',
+        stats: {
+            strength: 3,
+            agility: 2,
+            intelligence: 0,
+            charisma: 0,
+            health: 50,
+            maxHealth: 50,
+            mana: 0,
+            maxMana: 0
+        }
+    },
+    ranger: {
+        name: 'Ranger',
+        ability: 'Precise Shot - Critical hit chance increased',
+        stats: {
+            strength: 1,
+            agility: 3,
+            intelligence: 1,
+            charisma: 0,
+            health: 30,
+            maxHealth: 30,
+            mana: 20,
+            maxMana: 20
+        }
+    },
+    mage: {
+        name: 'Mage',
+        ability: 'Arcane Mastery - Spell damage increased',
+        stats: {
+            strength: 0,
+            agility: 1,
+            intelligence: 3,
+            charisma: 1,
+            health: 20,
+            maxHealth: 20,
+            mana: 50,
+            maxMana: 50
+        }
+    },
+    cleric: {
+        name: 'Cleric',
+        ability: 'Divine Favor - Healing power increased',
+        stats: {
+            strength: 1,
+            agility: 0,
+            intelligence: 2,
+            charisma: 2,
+            health: 40,
+            maxHealth: 40,
+            mana: 40,
+            maxMana: 40
+        }
+    }
+};
+
+// Create a new character
+export function createCharacter(raceId, classId) {
+    const race = races[raceId];
+    const characterClass = classes[classId];
+    
+    if (!race || !characterClass) {
+        console.error('Invalid race or class');
+        return null;
+    }
+
+    // Combine base stats from race and class
+    const stats = {};
+    Object.keys(race.stats).forEach(stat => {
+        stats[stat] = (race.stats[stat] || 0) + (characterClass.stats[stat] || 0);
+    });
+
+    // Create character object
+    const character = {
+        race: raceId,
+        class: classId,
+        level: 1,
+        xp: 0,
+        xpToNext: 100,
+        health: stats.health,
+        maxHealth: stats.maxHealth,
+        mana: stats.mana,
+        maxMana: stats.maxMana,
+        strength: stats.strength,
+        agility: stats.agility,
+        intelligence: stats.intelligence,
+        charisma: stats.charisma,
+        stats: stats, // Keep stats object for reference
+        inventory: [],
+        gold: 0
     };
+
+    console.log('Created character:', character);
+    return character;
+}
+
+export function calculateXPForLevel(level) {
+    return Math.floor(100 * Math.pow(1.5, level - 1));
 }

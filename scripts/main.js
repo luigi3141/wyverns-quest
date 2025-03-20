@@ -1,21 +1,23 @@
-// Game state management
+// Game state
 export const gameState = {
     player: null,
+    currentEncounter: null,
     inventory: [],
     quests: [],
-    dungeons: []
+    gold: 0
 };
 
 console.log('main.js loaded, gameState:', gameState);
 
-// Save game state
+// Save/Load functions
 export function saveGame() {
+    console.log('Saving game...');
     localStorage.setItem('wyvernQuestSave', JSON.stringify(gameState));
     console.log('Game saved:', gameState);
 }
 
-// Load game state
 export function loadGame() {
+    console.log('Loading game...');
     const savedState = localStorage.getItem('wyvernQuestSave');
     if (savedState) {
         Object.assign(gameState, JSON.parse(savedState));
@@ -26,5 +28,7 @@ export function loadGame() {
 // Initialize game
 document.addEventListener('DOMContentLoaded', () => {
     console.log('main.js: DOM Content Loaded');
-    loadGame();
 });
+
+// Load saved game when available
+loadGame();

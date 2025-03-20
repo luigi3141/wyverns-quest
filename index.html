@@ -19,12 +19,8 @@
             </div>
             <div class="explore-section">
                 <h2>Explore Areas</h2>
-                <div class="area-buttons">
-                    <button id="explore-forest-btn">Forest (Level 1+)</button>
-                    <button id="explore-cave-btn">Cave (Level 3+)</button>
-                    <button id="explore-desert-btn">Desert (Level 5+)</button>
-                    <button id="explore-swamp-btn">Swamp (Level 7+)</button>
-                    <button id="explore-mountain-btn">Mountain (Level 10+)</button>
+                <div id="area-buttons" class="area-buttons">
+                    <!-- Area buttons will be dynamically added here -->
                 </div>
             </div>
         </div>
@@ -69,8 +65,10 @@
         <div id="exploration-screen" class="screen hidden">
             <h2>Exploring <span id="current-location">Forest</span></h2>
             <div id="exploration-description"></div>
-            <button id="continue-exploring-btn">Continue Exploring</button>
-            <button id="return-to-town-btn">Return to Town</button>
+            <div class="exploration-buttons">
+                <button id="continue-exploring-btn">Continue Exploring</button>
+                <button id="return-to-town-btn">Return to Town</button>
+            </div>
         </div>
 
         <!-- Encounter Screen -->
@@ -121,14 +119,9 @@
             </div>
         </div>
     </div>
+
+    <!-- Load scripts -->
     <script type="module" src="scripts/main.js"></script>
     <script type="module" src="scripts/ui.js"></script>
-    <script type="module" src="scripts/character.js"></script>
-    <script type="module" src="scripts/dungeon.js"></script>
-    <script type="module" src="scripts/combat.js"></script>
-    <script type="module" src="scripts/enemies.js"></script>
-    <script type="module" src="scripts/inventory.js"></script>
-    <script type="module" src="scripts/quests.js"></script>
-    <script type="module" src="scripts/audio.js"></script>
 </body>
 </html>

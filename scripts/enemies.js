@@ -2,6 +2,78 @@
 import { gameState } from './main.js';
 import { currentCombatState, startCombat as initCombat, updateCombatUI } from './combat.js';
 
+// Enemy definitions
+export const enemies = {
+    // Forest enemies (Level 1-5)
+    'Wolf': {
+        level: 1,
+        stats: {
+            health: 30,
+            maxHealth: 30,
+            strength: 3,
+            agility: 4
+        },
+        xp: 20,
+        gold: 5
+    },
+    'Bandit': {
+        level: 2,
+        stats: {
+            health: 40,
+            maxHealth: 40,
+            strength: 4,
+            agility: 3
+        },
+        xp: 25,
+        gold: 10
+    },
+    'Giant Spider': {
+        level: 3,
+        stats: {
+            health: 35,
+            maxHealth: 35,
+            strength: 5,
+            agility: 5
+        },
+        xp: 30,
+        gold: 8
+    },
+    // Cave enemies (Level 3-8)
+    'Goblin': {
+        level: 3,
+        stats: {
+            health: 45,
+            maxHealth: 45,
+            strength: 5,
+            agility: 4
+        },
+        xp: 35,
+        gold: 15
+    },
+    'Cave Bear': {
+        level: 5,
+        stats: {
+            health: 60,
+            maxHealth: 60,
+            strength: 7,
+            agility: 3
+        },
+        xp: 50,
+        gold: 20
+    },
+    'Rock Elemental': {
+        level: 7,
+        stats: {
+            health: 80,
+            maxHealth: 80,
+            strength: 8,
+            agility: 2
+        },
+        xp: 70,
+        gold: 30
+    }
+};
+
 // Enemy types and their stats
 export const enemyTypes = {
     // Forest Enemies

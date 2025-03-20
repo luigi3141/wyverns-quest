@@ -1,277 +1,171 @@
 // Import game state
 import { gameState } from './main.js';
+import { enemies } from './enemies.js';
 
-// Combat system
-export let currentCombatState = null;
+// Combat state
+export let currentCombatState = {
+    enemy: null,
+    playerTurn: true,
+    round: 1
+};
 
-export function calculateDamage(attacker, defender, isAbility = false) {
-    let baseDamage = attacker.damage || Math.floor(attacker.stats.strength * 1.5);
-    
-    if (isAbility) {
-        baseDamage *= 1.5; // Abilities do 50% more damage
+// Initialize combat with an enemy
+export function startCombat(enemyName) {
+    const enemy = enemies[enemyName];
+    if (!enemy) {
+        console.error(`Enemy ${enemyName} not found!`);
+        return;
     }
 
-    // Add random variance (-10% to +10%)
-    const variance = 0.9 + Math.random() * 0.2;
-    return Math.floor(baseDamage * variance);
-}
-
-export function startCombat(player, enemies) {
-    const combatState = {
-        turnOrder: [player, ...enemies].sort((a, b) => 
-            (b.stats?.agility || 0) - (a.stats?.agility || 0)
-        ),
-        currentTurn: 0,
-        round: 1,
-        log: []
+    currentCombatState = {
+        enemy: {
+            name: enemyName,
+            ...enemy,
+            currentHealth: enemy.stats.health,
+            maxHealth: enemy.stats.maxHealth
+        },
+        playerTurn: true,
+        round: 1
     };
 
-    currentCombatState = combatState;
     updateCombatUI();
-    return combatState;
+    updateCombatLog(`Combat started with ${enemyName}!`);
 }
 
+// Update the combat UI
 export function updateCombatUI() {
-    if (!currentCombatState) return;
+    if (!currentCombatState.enemy) return;
 
-    const player = currentCombatState.turnOrder[0];
-    const enemy = currentCombatState.turnOrder[1]; // For now, just show first enemy
+    // Update enemy health
+    const enemyHp = document.getElementById('enemy-hp');
+    const enemyMaxHp = document.getElementById('enemy-max-hp');
+    if (enemyHp) enemyHp.textContent = Math.max(0, currentCombatState.enemy.currentHealth);
+    if (enemyMaxHp) enemyMaxHp.textContent = currentCombatState.enemy.maxHealth;
 
-    // Update health bars
-    const playerHealthPercent = (player.stats.health / player.stats.maxHealth) * 100;
-    const playerManaPercent = (player.stats.mana / player.stats.maxMana) * 100;
-    document.getElementById('player-health').style.width = `${playerHealthPercent}%`;
-    document.getElementById('player-mana').style.width = `${playerManaPercent}%`;
-    document.getElementById('player-health-text').textContent = 
-        `${player.stats.health}/${player.stats.maxHealth}`;
-    document.getElementById('player-mana-text').textContent = 
-        `${player.stats.mana}/${player.stats.maxMana}`;
-
-    const enemyHealthPercent = (enemy.health / enemy.maxHealth) * 100;
-    document.getElementById('enemy-health').style.width = `${enemyHealthPercent}%`;
-    document.getElementById('enemy-health-text').textContent = 
-        `${enemy.health}/${enemy.maxHealth}`;
-
-    // Update names
-    document.getElementById('player-name').textContent = `${player.race} ${player.class}`;
-    document.getElementById('enemy-name').textContent = enemy.type;
+    // Update player health
+    const playerHp = document.getElementById('player-hp');
+    const playerMaxHp = document.getElementById('player-max-hp');
+    if (playerHp) playerHp.textContent = Math.max(0, gameState.player.health);
+    if (playerMaxHp) playerMaxHp.textContent = gameState.player.maxHealth;
 
     // Update round counter
-    document.getElementById('round-counter').textContent = currentCombatState.round;
+    const roundCounter = document.getElementById('round-counter');
+    if (roundCounter) roundCounter.textContent = `Round: ${currentCombatState.round}`;
 
-    // Update combat log
-    const logElement = document.getElementById('combat-log');
-    while (logElement.firstChild) {
-        logElement.removeChild(logElement.firstChild);
+    // Update health bars
+    updateHealthBars();
+}
+
+// Update health bars
+function updateHealthBars() {
+    // Update enemy health bar
+    const enemyHealthFill = document.querySelector('#enemy-health .health-fill');
+    if (enemyHealthFill) {
+        const enemyHealthPercent = Math.max(0, Math.min(100, (currentCombatState.enemy.currentHealth / currentCombatState.enemy.maxHealth) * 100));
+        enemyHealthFill.style.width = `${enemyHealthPercent}%`;
     }
-    currentCombatState.log.slice(-5).forEach(message => {
-        const messageElement = document.createElement('div');
-        messageElement.className = 'message';
-        if (message.includes('damage')) messageElement.classList.add('damage');
-        if (message.includes('heals')) messageElement.classList.add('heal');
-        if (message.includes('effect')) messageElement.classList.add('effect');
-        messageElement.textContent = message;
-        logElement.appendChild(messageElement);
-    });
 
-    // Update button states
-    const isPlayerTurn = currentCombatState.currentTurn % currentCombatState.turnOrder.length === 0;
-    const ability = player.abilities[0];
-    
-    document.getElementById('attack-btn').disabled = !isPlayerTurn;
-    document.getElementById('ability-btn').disabled = !isPlayerTurn || ability.currentCooldown > 0;
-    document.getElementById('defend-btn').disabled = !isPlayerTurn;
-    document.getElementById('item-btn').disabled = !isPlayerTurn || !player.inventory?.length;
-
-    if (ability.currentCooldown > 0) {
-        document.getElementById('ability-btn').textContent = 
-            `${ability.name} (${ability.currentCooldown})`;
-    } else {
-        document.getElementById('ability-btn').textContent = ability.name;
+    // Update player health bar
+    const playerHealthFill = document.querySelector('#player-health .health-fill');
+    if (playerHealthFill) {
+        const playerHealthPercent = Math.max(0, Math.min(100, (gameState.player.health / gameState.player.maxHealth) * 100));
+        playerHealthFill.style.width = `${playerHealthPercent}%`;
     }
 }
 
-export function processTurn(combatState, action) {
-    const currentActor = combatState.turnOrder[combatState.currentTurn % combatState.turnOrder.length];
-    const isPlayer = currentActor === combatState.turnOrder[0];
+// Update combat log
+function updateCombatLog(message) {
+    const combatLog = document.getElementById('combat-log');
+    if (combatLog) {
+        const logEntry = document.createElement('p');
+        logEntry.textContent = message;
+        combatLog.appendChild(logEntry);
+        combatLog.scrollTop = combatLog.scrollHeight;
+    }
+}
 
-    if (isPlayer) {
-        switch (action.type) {
-            case 'attack':
-                const damage = calculateDamage(currentActor, action.target);
-                action.target.health -= damage;
-                combatState.log.push(`Player attacks ${action.target.type} for ${damage} damage!`);
-                break;
-            case 'ability':
-                if (currentActor.abilities[0].currentCooldown === 0) {
-                    const damage = calculateDamage(currentActor, action.target, true);
-                    action.target.health -= damage;
-                    currentActor.abilities[0].currentCooldown = currentActor.abilities[0].cooldown;
-                    combatState.log.push(`Player uses ${currentActor.abilities[0].name} on ${action.target.type} for ${damage} damage!`);
-                } else {
-                    combatState.log.push(`${currentActor.abilities[0].name} is on cooldown for ${currentActor.abilities[0].currentCooldown} more turns!`);
-                }
-                break;
-            case 'defend':
-                currentActor.defending = true;
-                combatState.log.push('Player takes defensive stance!');
-                break;
-            case 'item':
-                if (action.item && currentActor.inventory.includes(action.item)) {
-                    useItem(currentActor, action.item);
-                    currentActor.inventory = currentActor.inventory.filter(i => i !== action.item);
-                    combatState.log.push(`Player uses ${action.item.name}!`);
-                }
-                break;
-        }
-    } else {
-        // Enemy turn
-        const damage = calculateDamage(currentActor, combatState.turnOrder[0]);
-        const finalDamage = combatState.turnOrder[0].defending ? Math.floor(damage / 2) : damage;
-        combatState.turnOrder[0].stats.health -= finalDamage;
-        combatState.log.push(`${currentActor.type} attacks player for ${finalDamage} damage!`);
+// Player attack
+export function playerAttack() {
+    if (!currentCombatState.enemy || !currentCombatState.playerTurn) return;
+
+    console.log('Player stats:', gameState.player);
+    console.log('Player strength:', gameState.player.strength);
+    
+    const damage = Math.floor(gameState.player.strength * (Math.random() * 0.5 + 0.75));
+    console.log('Calculated damage:', damage);
+    
+    currentCombatState.enemy.currentHealth -= damage;
+    updateCombatLog(`You hit ${currentCombatState.enemy.name} for ${damage} damage!`);
+
+    if (currentCombatState.enemy.currentHealth <= 0) {
+        endCombat(true);
+        return;
     }
 
-    // Reset defend status and decrease ability cooldowns
-    if (isPlayer) {
-        currentActor.defending = false;
-        currentActor.abilities.forEach(ability => {
-            if (ability.currentCooldown > 0) ability.currentCooldown--;
-        });
-    }
-
-    // Advance turn
-    combatState.currentTurn++;
-    if (combatState.currentTurn % combatState.turnOrder.length === 0) {
-        combatState.round++;
-    }
-
-    // Check for combat end
-    const playerDead = combatState.turnOrder[0].stats.health <= 0;
-    const enemiesDefeated = combatState.turnOrder.slice(1).every(enemy => enemy.health <= 0);
-
-    if (playerDead || enemiesDefeated) {
-        combatState.ended = true;
-        combatState.victory = enemiesDefeated;
-        
-        if (enemiesDefeated) {
-            const totalXP = combatState.turnOrder.slice(1)
-                .reduce((sum, enemy) => sum + (enemy.xp || 0), 0);
-            combatState.log.push(`Victory! Gained ${totalXP} XP!`);
-            gameState.player.xp += totalXP;
-            checkLevelUp();
-        } else {
-            combatState.log.push('Defeat! You have been slain...');
-            handlePlayerDeath();
-        }
-    }
-
+    currentCombatState.playerTurn = false;
     updateCombatUI();
-    return combatState;
+    setTimeout(enemyTurn, 1000);
 }
 
-export function initializeCombatListeners() {
-    document.getElementById('attack-btn').addEventListener('click', () => {
-        if (currentCombatState && !currentCombatState.ended) {
-            processTurn(currentCombatState, {
-                type: 'attack',
-                target: currentCombatState.turnOrder[1] // Attack first enemy
-            });
-        }
-    });
+// Enemy turn
+function enemyTurn() {
+    if (!currentCombatState.enemy || currentCombatState.playerTurn) return;
 
-    document.getElementById('ability-btn').addEventListener('click', () => {
-        if (currentCombatState && !currentCombatState.ended) {
-            processTurn(currentCombatState, {
-                type: 'ability',
-                target: currentCombatState.turnOrder[1] // Use ability on first enemy
-            });
-        }
-    });
+    const damage = Math.floor(currentCombatState.enemy.stats.strength * (Math.random() * 0.5 + 0.75));
+    gameState.player.health -= damage;
+    updateCombatLog(`${currentCombatState.enemy.name} hits you for ${damage} damage!`);
 
-    document.getElementById('defend-btn').addEventListener('click', () => {
-        if (currentCombatState && !currentCombatState.ended) {
-            processTurn(currentCombatState, { type: 'defend' });
-        }
-    });
-
-    document.getElementById('item-btn').addEventListener('click', () => {
-        const inventory = document.getElementById('combat-inventory');
-        inventory.classList.toggle('active');
-        if (inventory.classList.contains('active')) {
-            displayCombatInventory();
-        }
-    });
-}
-
-export function displayCombatInventory() {
-    const inventory = document.getElementById('combat-inventory');
-    inventory.innerHTML = '';
-
-    gameState.player.inventory.forEach(item => {
-        const slot = document.createElement('div');
-        slot.className = 'item-slot';
-        slot.textContent = item.name;
-        slot.addEventListener('click', () => {
-            processTurn(currentCombatState, { type: 'item', item });
-            inventory.classList.remove('active');
-        });
-        inventory.appendChild(slot);
-    });
-}
-
-export function useItem(character, item) {
-    switch (item.type) {
-        case 'health_potion':
-            const healAmount = Math.min(
-                item.value,
-                character.stats.maxHealth - character.stats.health
-            );
-            character.stats.health += healAmount;
-            currentCombatState.log.push(`Restored ${healAmount} health!`);
-            break;
-        case 'mana_potion':
-            const manaAmount = Math.min(
-                item.value,
-                character.stats.maxMana - character.stats.mana
-            );
-            character.stats.mana += manaAmount;
-            currentCombatState.log.push(`Restored ${manaAmount} mana!`);
-            break;
+    if (gameState.player.health <= 0) {
+        endCombat(false);
+        return;
     }
+
+    currentCombatState.playerTurn = true;
+    currentCombatState.round++;
+    updateCombatUI();
 }
 
-export function checkLevelUp() {
-    while (gameState.player.xp >= gameState.player.xpToNext) {
-        gameState.player.level++;
-        gameState.player.xp -= gameState.player.xpToNext;
-        gameState.player.xpToNext = calculateXPForLevel(gameState.player.level + 1);
-        
-        // Increase stats
-        gameState.player.stats.maxHealth += 10;
-        gameState.player.stats.health = gameState.player.stats.maxHealth;
-        gameState.player.stats.maxMana += 5;
-        gameState.player.stats.mana = gameState.player.stats.maxMana;
-        gameState.player.stats.strength += 2;
-        gameState.player.stats.agility += 2;
-        gameState.player.stats.intelligence += 2;
-        gameState.player.stats.charisma += 1;
+// End combat
+function endCombat(victory) {
+    if (victory) {
+        const xpGained = currentCombatState.enemy.xp;
+        const goldGained = currentCombatState.enemy.gold;
+        gameState.player.xp += xpGained;
+        gameState.player.gold += goldGained;
+        updateCombatLog(`Victory! Gained ${xpGained} XP and ${goldGained} gold.`);
 
-        currentCombatState.log.push(`Level Up! You are now level ${gameState.player.level}!`);
+        // Check for level up
+        const xpNeeded = gameState.player.level * 100;
+        if (gameState.player.xp >= xpNeeded) {
+            gameState.player.level++;
+            gameState.player.xp -= xpNeeded;
+            gameState.player.maxHealth += 10;
+            gameState.player.health = gameState.player.maxHealth;
+            gameState.player.strength += 2;
+            updateCombatLog(`Level Up! You are now level ${gameState.player.level}!`);
+        }
+    } else {
+        updateCombatLog('You were defeated! Returning to town...');
+        gameState.player.health = Math.floor(gameState.player.maxHealth * 0.5); // Restore 50% health
     }
+
+    // Save game state
+    localStorage.setItem('gameState', JSON.stringify(gameState));
+
+    // Return to town after 2 seconds
+    setTimeout(() => {
+        document.querySelectorAll('.screen').forEach(screen => screen.classList.add('hidden'));
+        document.getElementById('main-menu').classList.remove('hidden');
+    }, 2000);
 }
 
-export function handlePlayerDeath() {
-    // Lose 80% of gold
-    const goldLost = Math.floor(gameState.player.gold * 0.8);
-    gameState.player.gold -= goldLost;
-    
-    // Restore some health
-    gameState.player.stats.health = Math.floor(gameState.player.stats.maxHealth * 0.3);
-    
-    // Add death message
-    currentCombatState.log.push(`You lost ${goldLost} gold...`);
+// Initialize combat buttons
+export function initCombatButtons() {
+    const attackBtn = document.getElementById('attack-btn');
+    if (attackBtn) {
+        attackBtn.onclick = playerAttack;
+    }
 }
 
 // Initialize combat listeners when the document is ready
-document.addEventListener('DOMContentLoaded', initializeCombatListeners);
+document.addEventListener('DOMContentLoaded', initCombatButtons);
